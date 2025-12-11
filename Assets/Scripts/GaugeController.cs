@@ -1,60 +1,49 @@
 using UnityEngine;
+using UnityEngine.UI;
 
-public class GaugeController : MonoBehaviour
+
+public class AirplaneHUDController : MonoBehaviour
 {
-    [Header("Needles")]
-    public RectTransform speedNeedle;      // Assign Speedometer Needle
-    public RectTransform altitudeNeedle;   // Assign Altimeter Needle
+    [Header("Speedometer Controls")]
+    public Slider SpeedSlider;
+    public RectTransform speedneedle;
 
-    [Header("Values")]
-    public float speedValue = 0f;
-    public float maxSpeed = 400f;
+    [Header("Altimeter Controls")]
+    public Slider altitudeSlider;
+    public RectTransform altitudeNeedle;
 
-    public float altitudeValue = 0f;
-    public float maxAltitude = 9000f;
 
-    [Header("Rates")]
-    public float speedIncreaseRate = 40f;      // How fast speed increases when holding button
-    public float altitudeIncreaseRate = 300f;  // How fast altitude increases
+    [Header("Needle Rotation Settings")]
+    public float speedMinAngle = 130f;
+    public float speedMaxAngle = 130f;
+    public float altitudeMinAngle = 130f;
+    public float altitudeMaxAngle = 130f;
 
-    // Internal flags
-    private bool speedPressed = false;
-    private bool altitudePressed = false;
 
-    void Update()
+    void Start()
     {
-        // If speed button is being held
-        if (speedPressed)
-        {
 
-            speedValue += speedIncreaseRate * Time.deltaTime;
-        }
-        else
-        {
-
-            speedValue -= speedIncreaseRate * Time.deltaTime;
-        }
-        speedValue = Mathf.Clamp(speedValue, 0, maxSpeed);
-
-        // If altitude button is being held
-        if (altitudePressed)
-        {
-
-            altitudeValue += altitudeIncreaseRate * Time.deltaTime;
-        }
-        else
-        {
-            altitudeValue -= altitudeIncreaseRate * Time.deltaTime;
-        }
-
-         altitudeValue = Mathf.Clamp(altitudeValue, 0, maxAltitude);
-        
-
-        speedNeedle.localRotation = Quaternion.Euler(0, 0, MapRangeClamped(speedValue, 0, maxSpeed, 0, -260));
-        altitudeNeedle.localRotation = Quaternion.Euler(0, 0, MapRangeClamped(altitudeValue, 0, maxSpeed, 0, -280));
+        SpeedSlider.onValueChanged.AddListener(UpdateSpeedometer);
+        altitudeSlider.onValueChanged.AddListener(UpdateAltimeter);
     }
 
+    void UpdateSpeedometer(float value)
+    {
+        float angle = 0;
 
+        angle = MapRangeClamped(SpeedSlider.value, 0, 1, speedMinAngle, speedMaxAngle);
+
+        speedneedle.localRotation = Quaternion.Euler(0, 0, angle);
+    }
+
+    void UpdateAltimeter(float value)
+    {
+        float angle = 0;
+
+        angle = MapRangeClamped(altitudeSlider.value, 0, 1, altitudeMinAngle, altitudeMaxAngle);
+
+        altitudeNeedle.localRotation = Quaternion.Euler(0, 0, angle);
+    }
 
     public static float MapRangeClamped(float value, float inMin, float inMax, float outMin, float outMax)
     {
@@ -62,31 +51,7 @@ public class GaugeController : MonoBehaviour
         return outMin + (outMax - outMin) * t;
     }
 
-    // Called when Speed button is pressed down
-    public void SpeedPressedDown()
-    {
-        speedPressed = true;
-        Debug.Log("speed pressed down detected");
-    }
-
-    // Called when Speed button is released
-    public void SpeedReleased()
-    {
-        speedPressed = false;
-        Debug.Log("speed released detected");
-    }
-
-    // Called when Altitude button is pressed down
-    public void AltitudePressedDown()
-    {
-        altitudePressed = true;
-    }
-
-    // Called when Altitude button is released
-    public void AltitudeReleased()
-    {
-        altitudePressed = false;
-    }
 }
+
 
 
